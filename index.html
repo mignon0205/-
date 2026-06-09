@@ -149,7 +149,7 @@
   </main>
 </div>
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMlTeqDP6VoXhkyqqSg56uvC16DMfSmugUi64ONAG5STU4jELvo0gjSEzkj2Tf5lQYEQ/exec";
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbzMlTeqDP6VoXhkyqqSg56uvC16DMfSmugUi64ONAG5STU4jELvo0gjSEzkj2Tf5lQYEQ/exec";
 const COLORS=['#1D9E75','#378ADD','#D85A30','#7F77DD','#D4537E','#639922','#BA7517','#3C3489'];
 const AV_BG=['#E1F5EE','#E6F1FB','#FAECE7','#FBEAF0','#EAF3DE','#FAEEDA','#F1EFE8'];
 const AV_FG=['#085041','#0C447C','#712B13','#72243E','#27500A','#633806','#444441'];
@@ -201,14 +201,19 @@ function startTask(){
   const now=new Date();
   current={id:uuid(),name,date:fmtD(now),start:fmtT(now),startMs:now.getTime()};
   api({action:'addRecord',id:current.id,user:myName,task:name,date:current.date,start:current.start,end:'',duration_ms:''});
+  myRecords.unshift({id:current.id,name:current.name,date:current.date,start:current.start,end:null,durationMs:0});
+  document.getElementById('ti').value='';
   document.getElementById('sb').disabled=true;
   document.getElementById('eb').disabled=false;
   document.getElementById('dot').classList.add('on');
   clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
     document.getElementById('st').textContent='"'+current.name+'" 진행 중 — '+minStr(Date.now()-current.startMs);
-  },1000);
+    myRecords[0].durationMs=Date.now()-current.startMs;
+    renderMy();
+  },5000);
   document.getElementById('st').textContent='"'+name+'" 시작됨';
+  renderMy();
 }
 async function stopTask(){
   if(!current)return;
@@ -217,14 +222,12 @@ async function stopTask(){
   const endTime=fmtT(now);
   const durationMs=now.getTime()-current.startMs;
   await api({action:'updateRecord',id:current.id,end:endTime,duration_ms:durationMs});
-  const rec={...current,end:endTime,durationMs};
-  myRecords.unshift(rec);
+  myRecords[0]={...current,end:endTime,durationMs};
   current=null;
   document.getElementById('sb').disabled=false;
   document.getElementById('eb').disabled=true;
   document.getElementById('dot').classList.remove('on');
-  document.getElementById('st').textContent='"'+rec.name+'" 완료 — '+minStr(rec.durationMs);
-  document.getElementById('ti').value='';
+  document.getElementById('st').textContent='"'+myRecords[0].name+'" 완료 — '+minStr(myRecords[0].durationMs);
   renderMy();
 }
 async function deleteRecord(idx,id){
@@ -301,10 +304,14 @@ async function showOtherView(name){
   document.getElementById('otherLog').innerHTML=recs.length?recs.map(r=>{const col=colorFor(r.name);return'<tr><td style="font-weight:500">'+r.name+'</td><td style="color:var(--muted);font-size:12px">'+r.date+'</td><td style="color:var(--muted);font-size:12px">'+r.start+'</td><td style="color:var(--muted);font-size:12px">'+(r.end||'—')+'</td><td>'+(r.end?'<span class="tag" style="background:'+col+'22;color:'+col+'">'+minStr(r.durationMs)+'</span>':'진행중')+'</td></tr>'}).join(''):'<tr><td colspan="5" class="empty">기록이 없습니다.</td></tr>';
 }
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&myName&&document.getElementById('ti')===document.activeElement){if(!current)startTask();else stopTask()}});
+  document.getElementById('nameInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();login();}
+  });
+  document.getElementById('ti').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();if(!current)startTask();else stopTask();}
+  });
   const saved=localStorage.getItem('tt_name');
-  if(saved){document.getElementById('nameInput').value=saved;login()}
+  if(saved){document.getElementById('nameInput').value=saved;login();}
 });
 </script>
 </body>
