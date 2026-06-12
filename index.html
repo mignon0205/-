@@ -17,15 +17,17 @@
   .user-item:hover{background:var(--bg)}
   .user-item.active{background:var(--bg);font-weight:500}
   .avatar{width:26px;height:26px;border-radius:50%;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .main{flex:1;overflow:auto;padding:2rem;max-width:800px}
+  .main{flex:1;overflow:auto;padding:2rem;max-width:860px}
   .onboard-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
   .onboard-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:400px;width:100%;text-align:center}
   .onboard-card h1{font-size:22px;font-weight:600;letter-spacing:-.03em;margin-bottom:.5rem}
   .onboard-card p{color:var(--muted);font-size:13px;margin-bottom:1.5rem;line-height:1.6}
   .onboard-row{display:flex;gap:8px}
-  input[type=text]{flex:1;height:40px;padding:0 14px;font-size:14px;font-family:var(--font);border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;width:100%}
-  input[type=text]:focus{border-color:var(--accent)}
-  input[type=text]::placeholder{color:var(--muted)}
+  input[type=text],input[type=number]{flex:1;height:40px;padding:0 14px;font-size:14px;font-family:var(--font);border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;width:100%}
+  input[type=text]:focus,input[type=number]:focus{border-color:var(--accent)}
+  input[type=text]::placeholder,input[type=number]::placeholder{color:var(--muted)}
+  input[type=number]{-moz-appearance:textfield}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
   .btn{height:40px;padding:0 18px;font-size:14px;font-family:var(--font);font-weight:500;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap}
   .btn:hover{background:var(--bg)}
   .btn:active{transform:scale(0.98)}
@@ -36,7 +38,15 @@
   .page-hd h2{font-size:20px;font-weight:600;letter-spacing:-.03em}
   .page-hd .sub{font-family:var(--mono);font-size:12px;color:var(--muted)}
   .tracker-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem}
-  .tracker-row{display:flex;gap:8px}
+  .tracker-row{display:flex;gap:8px;margin-bottom:8px}
+  .tracker-row2{display:flex;gap:8px}
+  .input-label{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;letter-spacing:.03em}
+  .input-wrap{display:flex;flex-direction:column;flex:1}
+  .input-wrap.qty{max-width:120px}
+  .qty-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+  .qty-wrap input{border:none;border-radius:0;background:transparent;text-align:center;width:60px;flex:1}
+  .qty-wrap input:focus{outline:none}
+  .qty-unit{padding:0 10px;font-size:13px;color:var(--muted);background:var(--bg);border-left:1px solid var(--border);height:40px;display:flex;align-items:center;white-space:nowrap}
   .status-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
   .dot.on{background:var(--accent);animation:blink 1.4s infinite}
@@ -65,11 +75,7 @@
   .sm-btn{height:28px;padding:0 12px;font-size:11px;font-family:var(--font);font-weight:500;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
   .sm-btn:hover{background:var(--bg)}
   .badge-me{font-size:10px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px;margin-left:4px;font-weight:500}
-  .user-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:12px}
-  .user-card{border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:background .12s}
-  .user-card:hover{background:var(--bg)}
-  .uc-name{font-size:13px;font-weight:500;margin-bottom:2px}
-  .uc-stat{font-size:11px;color:var(--muted)}
+  .cat-tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
   @media(max-width:600px){.sidebar{display:none}.main{padding:1rem}.metrics{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -88,7 +94,7 @@
 
 <div id="appShell" class="shell" style="display:none">
   <aside class="sidebar">
-    <div class="sidebar-logo">⏱ 트래커</div>
+    <div class="sidebar-logo">⏱ 타임 트래커</div>
     <div id="myUserItem" class="user-item active" onclick="showMyView()">
       <div class="avatar" id="sideAvatar"></div>
       <span id="sideMyName"></span>
@@ -102,7 +108,6 @@
   </aside>
 
   <main class="main">
-    <!-- 내 뷰 -->
     <div id="myView">
       <div class="page-hd">
         <h2 id="pageTitle">내 트래커</h2>
@@ -110,48 +115,63 @@
       </div>
       <div class="tracker-box">
         <div class="tracker-row">
-          <input type="text" id="ti" placeholder="작업명 입력 (예: 보고서 작성)"/>
-          <button class="btn green" id="sb" onclick="startTask()">시작</button>
-          <button class="btn" id="eb" onclick="stopTask()" disabled>종료</button>
+          <div class="input-wrap">
+            <div class="input-label">카테고리</div>
+            <input type="text" id="ti-cat" placeholder="예: 클라이언트A"/>
+          </div>
+          <div class="input-wrap">
+            <div class="input-label">업무명</div>
+            <input type="text" id="ti-task" placeholder="예: 영상 편집"/>
+          </div>
+          <div class="input-wrap qty">
+            <div class="input-label">업무량</div>
+            <div class="qty-wrap">
+              <input type="number" id="ti-qty" placeholder="0" min="0"/>
+              <span class="qty-unit">건</span>
+            </div>
+          </div>
+        </div>
+        <div class="tracker-row2">
+          <button class="btn green" id="sb" onclick="startTask()" style="flex:1">시작</button>
+          <button class="btn" id="eb" onclick="stopTask()" disabled style="flex:1">종료</button>
         </div>
         <div class="status-row">
           <div class="dot" id="dot"></div>
-          <span id="st">작업명을 입력하고 시작 버튼을 누르세요.</span>
+          <span id="st">카테고리와 업무명을 입력하고 시작 버튼을 누르세요.</span>
         </div>
       </div>
       <div class="metrics">
         <div class="metric"><div class="m-label">오늘 총 시간</div><div class="m-val" id="mt">—</div></div>
         <div class="metric"><div class="m-label">완료 작업</div><div class="m-val" id="mc">—</div></div>
-        <div class="metric"><div class="m-label">최다 작업</div><div class="m-val" id="mx" style="font-size:13px;padding-top:4px">—</div></div>
+        <div class="metric"><div class="m-label">최다 카테고리</div><div class="m-val" id="mx" style="font-size:13px;padding-top:4px">—</div></div>
       </div>
       <div class="card">
-        <div class="card-hd">작업 분포 (오늘)</div>
+        <div class="card-hd">카테고리별 분포 (오늘)</div>
         <div class="bar-section" id="myBars"><div class="empty">기록이 쌓이면 나타납니다.</div></div>
       </div>
       <div class="card">
         <div class="card-hd"><span>기록</span><button class="sm-btn" onclick="syncFromSheet()">↻ 동기화</button></div>
         <table>
-          <thead><tr><th>작업명</th><th>날짜</th><th>시작</th><th>종료</th><th>시간</th><th></th></tr></thead>
-          <tbody id="myLog"><tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr></tbody>
+          <thead><tr><th>카테고리</th><th>업무명</th><th>업무량</th><th>날짜</th><th>시작</th><th>종료</th><th>시간</th><th></th></tr></thead>
+          <tbody id="myLog"><tr><td colspan="8" class="empty">아직 기록이 없습니다.</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- 다른 사람 뷰 -->
     <div id="otherView" style="display:none">
       <div class="page-hd"><h2 id="otherTitle"></h2></div>
       <div class="metrics">
         <div class="metric"><div class="m-label">오늘 총 시간</div><div class="m-val" id="oMt">—</div></div>
         <div class="metric"><div class="m-label">완료 작업</div><div class="m-val" id="oMc">—</div></div>
-        <div class="metric"><div class="m-label">최다 작업</div><div class="m-val" id="oMx" style="font-size:13px;padding-top:4px">—</div></div>
+        <div class="metric"><div class="m-label">최다 카테고리</div><div class="m-val" id="oMx" style="font-size:13px;padding-top:4px">—</div></div>
       </div>
       <div class="card">
-        <div class="card-hd">작업 분포 (오늘)</div>
+        <div class="card-hd">카테고리별 분포 (오늘)</div>
         <div class="bar-section" id="oBars"></div>
       </div>
       <div class="card">
         <div class="card-hd">전체 기록 (읽기 전용)</div>
-        <table><thead><tr><th>작업명</th><th>날짜</th><th>시작</th><th>종료</th><th>시간</th></tr></thead>
+        <table><thead><tr><th>카테고리</th><th>업무명</th><th>업무량</th><th>날짜</th><th>시작</th><th>종료</th><th>시간</th></tr></thead>
         <tbody id="otherLog"></tbody></table>
       </div>
     </div>
@@ -159,38 +179,28 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzMlTeqDP6VoXhkyqqSg56uvC16DMfSmugUi64ONAG5STU4jELvo0gjSEzkj2Tf5lQYEQ/exec';
-const COLORS = ['#1D9E75','#378ADD','#D85A30','#7F77DD','#D4537E','#639922','#BA7517'];
-const AV_BG  = ['#E1F5EE','#E6F1FB','#FAECE7','#FBEAF0','#EAF3DE','#FAEEDA','#F1EFE8'];
-const AV_FG  = ['#085041','#0C447C','#712B13','#72243E','#27500A','#633806','#444441'];
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzMlTeqDP6VoXhkyqqSg56uvC16DMfSmugUi64ONAG5STU4jELvo0gjSEzkj2Tf5lQYEQ/exec';
+const COLORS=['#1D9E75','#378ADD','#D85A30','#7F77DD','#D4537E','#639922','#BA7517'];
+const AV_BG=['#E1F5EE','#E6F1FB','#FAECE7','#FBEAF0','#EAF3DE','#FAEEDA','#F1EFE8'];
+const AV_FG=['#085041','#0C447C','#712B13','#72243E','#27500A','#633806','#444441'];
 
-let myName = null;
-let doneRecords = []; // 완료된 기록
-let current = null;   // 진행중인 작업
-let ticker = null;
+let myName=null,doneRecords=[],current=null,ticker=null;
 
 function pad(n){return String(n).padStart(2,'0')}
 function fmtT(d){return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())}
 function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function today(){return fmtD(new Date())}
-function minStr(ms){
-  if(!ms||ms<0)return '0분';
-  const m=Math.floor(ms/60000),h=Math.floor(m/60);
-  return h>0?h+'시간 '+(m%60)+'분':m+'분';
-}
+function minStr(ms){if(!ms||ms<0)return '0분';const m=Math.floor(ms/60000),h=Math.floor(m/60);return h>0?h+'시간 '+(m%60)+'분':m+'분'}
 function colorFor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h]}
 function avIdx(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%AV_BG.length;return h}
 function initials(n){return n.slice(0,2).toUpperCase()}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
 
 async function api(params){
-  try{
-    const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params),{redirect:'follow'});
-    return r.json();
-  }catch(e){console.error('API err',e);return null;}
+  try{const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams(params),{redirect:'follow'});return r.json();}
+  catch(e){console.error('API err',e);return null;}
 }
 
-// ── 로그인
 function login(){
   const n=document.getElementById('nameInput').value.trim();
   if(!n)return;
@@ -200,7 +210,7 @@ function login(){
   document.getElementById('appShell').style.display='flex';
   const idx=avIdx(n);
   const av=document.getElementById('sideAvatar');
-  av.textContent=initials(n); av.style.background=AV_BG[idx]; av.style.color=AV_FG[idx];
+  av.textContent=initials(n);av.style.background=AV_BG[idx];av.style.color=AV_FG[idx];
   document.getElementById('sideMyName').textContent=n;
   document.getElementById('pageTitle').textContent=n+'의 트래커';
   document.getElementById('pageDate').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
@@ -210,62 +220,59 @@ function login(){
 
 function logout(){
   if(current)stopTask();
-  myName=null; doneRecords=[];
+  myName=null;doneRecords=[];
   localStorage.removeItem('tt_name');
   document.getElementById('appShell').style.display='none';
   document.getElementById('onboardWrap').style.display='flex';
   document.getElementById('nameInput').value='';
 }
 
-// ── 시작 (엔터 또는 버튼)
 function startTask(){
-  const name=document.getElementById('ti').value.trim();
-  if(!name){document.getElementById('ti').focus();return;}
-  // 진행중인 작업이 있으면 먼저 종료
+  const cat=document.getElementById('ti-cat').value.trim();
+  const task=document.getElementById('ti-task').value.trim();
+  const qty=document.getElementById('ti-qty').value.trim();
+  if(!cat||!task){
+    if(!cat)document.getElementById('ti-cat').focus();
+    else document.getElementById('ti-task').focus();
+    return;
+  }
   if(current){
     clearInterval(ticker);
     const now=new Date();
     const endTime=fmtT(now);
     const durationMs=now.getTime()-current.startMs;
     api({action:'updateRecord',id:current.id,end:endTime,duration_ms:durationMs});
-    doneRecords.unshift({id:current.id,name:current.name,date:current.date,start:current.start,end:endTime,durationMs});
+    doneRecords.unshift({...current,end:endTime,durationMs});
     current=null;
   }
-
   const now=new Date();
-  current={id:uid(),name,date:fmtD(now),start:fmtT(now),startMs:now.getTime()};
-
-  // 시트에 저장 (화면과 무관하게 백그라운드로)
-  api({action:'addRecord',id:current.id,user:myName,task:name,date:current.date,start:current.start,end:'',duration_ms:''});
-
-  document.getElementById('ti').value='';
+  current={id:uid(),cat,task,qty:qty||'',date:fmtD(now),start:fmtT(now),startMs:now.getTime()};
+  api({action:'addRecord',id:current.id,user:myName,cat:current.cat,task:current.task,qty:current.qty,date:current.date,start:current.start,end:'',duration_ms:''});
+  document.getElementById('ti-cat').value='';
+  document.getElementById('ti-task').value='';
+  document.getElementById('ti-qty').value='';
   document.getElementById('sb').disabled=true;
   document.getElementById('eb').disabled=false;
   document.getElementById('dot').classList.add('on');
-  document.getElementById('st').textContent='"'+name+'" 시작됨';
-
+  document.getElementById('st').textContent='"'+cat+' / '+task+'" 시작됨';
   clearInterval(ticker);
   ticker=setInterval(()=>{
     const elapsed=Date.now()-current.startMs;
-    document.getElementById('st').textContent='"'+current.name+'" 진행 중 — '+minStr(elapsed);
-    renderMy(); // 진행중 시간 갱신
-  },10000); // 10초마다 화면 갱신
-
-  renderMy(); // 즉시 화면에 반영
+    document.getElementById('st').textContent='"'+current.cat+' / '+current.task+'" 진행 중 — '+minStr(elapsed);
+    renderMy();
+  },10000);
+  renderMy();
 }
 
-// ── 종료
 async function stopTask(){
   if(!current)return;
   clearInterval(ticker);
   const now=new Date();
   const endTime=fmtT(now);
   const durationMs=now.getTime()-current.startMs;
-
   api({action:'updateRecord',id:current.id,end:endTime,duration_ms:durationMs});
-  doneRecords.unshift({id:current.id,name:current.name,date:current.date,start:current.start,end:endTime,durationMs});
-
-  document.getElementById('st').textContent='"'+current.name+'" 완료 — '+minStr(durationMs);
+  doneRecords.unshift({...current,end:endTime,durationMs});
+  document.getElementById('st').textContent='"'+current.cat+' / '+current.task+'" 완료 — '+minStr(durationMs);
   current=null;
   document.getElementById('sb').disabled=false;
   document.getElementById('eb').disabled=true;
@@ -273,18 +280,18 @@ async function stopTask(){
   renderMy();
 }
 
-// ── 시트에서 동기화
 async function syncFromSheet(){
   const data=await api({action:'getRecords',user:myName});
   if(data&&data.records){
     doneRecords=data.records.filter(r=>r.end).map(r=>({
-      id:r.id,name:r.task,date:r.date,start:r.start,end:r.end,durationMs:Number(r.duration_ms)||0
+      id:r.id,cat:r.cat||'',task:r.task,qty:r.qty||'',
+      date:r.date,start:r.start,end:r.end,
+      durationMs:Number(r.duration_ms)||0
     }));
   }
   renderMy();
 }
 
-// ── 삭제
 async function delRec(i,id){
   if(!confirm('삭제할까요?'))return;
   api({action:'deleteRecord',id});
@@ -292,17 +299,15 @@ async function delRec(i,id){
   renderMy();
 }
 
-// ── 내 화면 렌더
 function renderMy(){
-  // 오늘 완료된 것만
   const done=doneRecords.filter(r=>r.date===today());
   const totalMs=done.reduce((s,r)=>s+r.durationMs,0);
   document.getElementById('mt').textContent=done.length?minStr(totalMs):'—';
   document.getElementById('mc').textContent=done.length?done.length+'개':'—';
 
-  const byTask={};
-  done.forEach(r=>{byTask[r.name]=(byTask[r.name]||0)+r.durationMs});
-  const sorted=Object.entries(byTask).sort((a,b)=>b[1]-a[1]);
+  const byCat={};
+  done.forEach(r=>{byCat[r.cat||'기타']=(byCat[r.cat||'기타']||0)+r.durationMs});
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   document.getElementById('mx').textContent=sorted.length?sorted[0][0]:'—';
 
   const bars=document.getElementById('myBars');
@@ -316,37 +321,36 @@ function renderMy(){
     ).join('');
   }
 
-  // 기록 테이블: 진행중 + 완료 모두 표시
   const rows=[];
-  if(current) rows.push({...current,end:null,durationMs:Date.now()-current.startMs,isActive:true});
+  if(current)rows.push({...current,end:null,durationMs:Date.now()-current.startMs,isActive:true});
   doneRecords.forEach((r,i)=>rows.push({...r,idx:i}));
 
   const log=document.getElementById('myLog');
-  if(!rows.length){log.innerHTML='<tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr>';return;}
+  if(!rows.length){log.innerHTML='<tr><td colspan="8" class="empty">아직 기록이 없습니다.</td></tr>';return;}
   log.innerHTML=rows.map(r=>{
-    const col=colorFor(r.name);
+    const col=colorFor(r.cat||'기타');
     const tag=r.end
       ?'<span class="tag" style="background:'+col+'22;color:'+col+'">'+minStr(r.durationMs)+'</span>'
       :'<span class="tag" style="background:#fff3cd;color:#856404">진행중</span>';
     const del=r.end?'<button class="del-btn" onclick="delRec('+r.idx+',\''+r.id+'\')">×</button>':'';
+    const qty=r.qty?'<span style="font-size:12px;color:var(--muted)">'+r.qty+'건</span>':'—';
     return '<tr>'+
-      '<td style="font-weight:500">'+r.name+'</td>'+
+      '<td><span class="cat-tag">'+(r.cat||'—')+'</span></td>'+
+      '<td style="font-weight:500">'+r.task+'</td>'+
+      '<td>'+qty+'</td>'+
       '<td style="color:var(--muted);font-size:12px">'+r.date+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+r.start+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+(r.end||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+r.start.slice(0,5)+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(r.end?r.end.slice(0,5):'—')+'</td>'+
       '<td>'+tag+'</td>'+
       '<td>'+del+'</td>'+
       '</tr>';
   }).join('');
 }
 
-// ── 사이드바 사용자 목록
 async function loadSideUsers(){
   const data=await api({action:'getUsers'});
   const el=document.getElementById('sideUserList');
-  if(!data||!data.users||!data.users.length){
-    el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px 9px">아직 없음</div>';return;
-  }
+  if(!data||!data.users||!data.users.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px 9px">아직 없음</div>';return;}
   el.innerHTML=data.users.filter(u=>u.name!==myName).map(u=>{
     const idx=avIdx(u.name);
     return '<div class="user-item" onclick="viewUser(\''+u.name+'\')">'+
@@ -357,25 +361,24 @@ async function loadSideUsers(){
   }).join('');
 }
 
-// ── 다른 사람 보기
 async function viewUser(name){
   showOtherView();
   document.getElementById('otherTitle').textContent=name+'의 트래커';
   document.getElementById('oBars').innerHTML='<div class="empty">불러오는 중...</div>';
-  document.getElementById('otherLog').innerHTML='<tr><td colspan="5" class="empty">불러오는 중...</td></tr>';
-
+  document.getElementById('otherLog').innerHTML='<tr><td colspan="7" class="empty">불러오는 중...</td></tr>';
   const data=await api({action:'getRecords',user:name});
-  if(!data||!data.records){
-    document.getElementById('otherLog').innerHTML='<tr><td colspan="5" class="empty">불러오기 실패</td></tr>';return;
-  }
-  const recs=data.records.filter(r=>r.end).map(r=>({name:r.task,date:r.date,start:r.start,end:r.end,durationMs:Number(r.duration_ms)||0}));
+  if(!data||!data.records){document.getElementById('otherLog').innerHTML='<tr><td colspan="7" class="empty">불러오기 실패</td></tr>';return;}
+  const recs=data.records.filter(r=>r.end).map(r=>({
+    cat:r.cat||'',task:r.task,qty:r.qty||'',
+    date:r.date,start:r.start,end:r.end,durationMs:Number(r.duration_ms)||0
+  }));
   const done=recs.filter(r=>r.date===today());
   const totalMs=done.reduce((s,r)=>s+r.durationMs,0);
   document.getElementById('oMt').textContent=done.length?minStr(totalMs):'—';
   document.getElementById('oMc').textContent=done.length?done.length+'개':'—';
-  const byTask={};
-  done.forEach(r=>{byTask[r.name]=(byTask[r.name]||0)+r.durationMs});
-  const sorted=Object.entries(byTask).sort((a,b)=>b[1]-a[1]);
+  const byCat={};
+  done.forEach(r=>{byCat[r.cat||'기타']=(byCat[r.cat||'기타']||0)+r.durationMs});
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   document.getElementById('oMx').textContent=sorted.length?sorted[0][0]:'—';
   const bars=document.getElementById('oBars');
   if(!sorted.length){bars.innerHTML='<div class="empty">오늘 기록이 없습니다.</div>';}
@@ -388,14 +391,20 @@ async function viewUser(name){
     ).join('');
   }
   document.getElementById('otherLog').innerHTML=recs.length
-    ?recs.map(r=>{const col=colorFor(r.name);return'<tr>'+
-      '<td style="font-weight:500">'+r.name+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+r.date+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+r.start+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+r.end+'</td>'+
-      '<td><span class="tag" style="background:'+col+'22;color:'+col+'">'+minStr(r.durationMs)+'</span></td>'+
-      '</tr>';}).join('')
-    :'<tr><td colspan="5" class="empty">기록이 없습니다.</td></tr>';
+    ?recs.map(r=>{
+        const col=colorFor(r.cat||'기타');
+        const qty=r.qty?r.qty+'건':'—';
+        return '<tr>'+
+          '<td><span class="cat-tag">'+(r.cat||'—')+'</span></td>'+
+          '<td style="font-weight:500">'+r.task+'</td>'+
+          '<td style="color:var(--muted);font-size:12px">'+qty+'</td>'+
+          '<td style="color:var(--muted);font-size:12px">'+r.date+'</td>'+
+          '<td style="color:var(--muted);font-size:12px">'+r.start.slice(0,5)+'</td>'+
+          '<td style="color:var(--muted);font-size:12px">'+r.end.slice(0,5)+'</td>'+
+          '<td><span class="tag" style="background:'+col+'22;color:'+col+'">'+minStr(r.durationMs)+'</span></td>'+
+          '</tr>';
+      }).join('')
+    :'<tr><td colspan="7" class="empty">기록이 없습니다.</td></tr>';
 }
 
 function showMyView(){
@@ -410,14 +419,9 @@ function showOtherView(){
   document.getElementById('myUserItem').classList.remove('active');
 }
 
-// ── 이벤트
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('nameInput').addEventListener('keydown',e=>{
-    if(e.key==='Enter'){e.preventDefault();login();}
-  });
-  document.getElementById('ti').addEventListener('keydown',e=>{
-    if(e.key==='Enter'){e.preventDefault();startTask();}
-  });
+  document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login();}});
+  document.getElementById('ti-task').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();startTask();}});
   const saved=localStorage.getItem('tt_name');
   if(saved){document.getElementById('nameInput').value=saved;login();}
 });
